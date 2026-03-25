@@ -93,7 +93,7 @@ html, body {
 .toggle-label input[type=checkbox] { cursor: pointer; accent-color: var(--accent2); }
 .toggle-label:hover { color: var(--text); }
 
-#refresh-btn {
+#refresh-btn, #export-btn {
     padding: 5px 12px;
     background: transparent;
     border: 1px solid var(--border);
@@ -103,7 +103,8 @@ html, body {
     cursor: pointer;
     transition: background var(--transition), border-color var(--transition);
 }
-#refresh-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+#refresh-btn:hover, #export-btn:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+#refresh-btn:disabled, #export-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 #node-count {
     color: var(--text-muted);

@@ -416,6 +416,32 @@ function initToolbar() {
     });
 
     document.getElementById('panel-close').addEventListener('click', clearSelection);
+
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            exportBtn.textContent = '📥 產生中…';
+            exportBtn.disabled = true;
+            try {
+                const res = await fetch('/api/export');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'knowledge-graph.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('匯出失敗：' + err.message);
+            } finally {
+                exportBtn.textContent = '📥 匯出';
+                exportBtn.disabled = false;
+            }
+        });
+    }
 }
 
 function updateTagFilter() {
