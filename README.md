@@ -44,15 +44,19 @@ uv sync
 uv run python create_sample.py
 ```
 
-會在 `sample_data/` 目錄下產生 7 個範例 Excel 檔，以供應鏈分析為主題，每個檔案代表一家企業：
+會在 `sample_data/` 目錄下產生 9 個範例 Excel 檔，以 **Apple iPhone 供應鏈**為主題，每個檔案代表一家真實供應商：
 
-| 層級 | 企業 | 角色 |
-|------|------|------|
-| Tier 3 原料 | 稀土礦業、鋼鐵原材料 | 上游原物料供應商 |
-| Tier 2 零組件 | 晶芯半導體、宏利機殼廠 | 中游零組件製造商 |
-| OEM 製造 | 台灣精密電子 | 品牌 OEM 組裝廠 |
-| 物流 | 環球物流 | 跨境物流整合商 |
-| 零售（無 Meta）| 全球零售商 | 下游零售客戶（隱式連結示範）|
+| 層級 | 企業 | 供應項目 |
+|------|------|----------|
+| Tier 1 | 台積電 | A 系列晶片代工（3nm/5nm）|
+| Tier 1 | 三星電子 | LPDDR5 記憶體、NAND Flash |
+| Tier 1 | 索尼半導體 | CMOS 影像感測器 |
+| Tier 1 | 康寧 | Ceramic Shield 螢幕玻璃 |
+| Tier 1 | 村田製作所 | MLCC 電容、RF 射頻模組 |
+| Tier 0 組裝 | 富士康 | iPhone 最終組裝（70%）|
+| 品牌 | Apple | 設計、品牌、供應鏈管理 |
+| 物流 | UPS物流 | 全球空運配送 |
+| 零售（無 Meta）| Best Buy | 終端零售（隱式連結示範）|
 
 ### 3. 啟動伺服器
 
@@ -62,9 +66,15 @@ uv run python main.py
 
 # 指定自訂資料夾
 uv run python main.py /path/to/your/excel/folder
+
+# 指定 port（預設 8000，port 被占用時使用）
+uv run python main.py --port 8001
+
+# 同時指定資料夾與 port
+uv run python main.py /path/to/your/excel/folder --port 8001
 ```
 
-啟動後瀏覽器會自動開啟 `http://localhost:8000`。
+啟動後瀏覽器會自動開啟對應的本地網址。
 
 ---
 

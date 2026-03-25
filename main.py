@@ -2,9 +2,10 @@
 Entry point for the Excel Knowledge Graph server.
 
 Usage:
-    uv run python main.py [<data_folder>]
+    uv run python main.py [<data_folder>] [--port <port>]
 
 If <data_folder> is omitted, defaults to ./sample_data/
+If --port is omitted, defaults to 8000.
 """
 from __future__ import annotations
 
@@ -27,19 +28,40 @@ from core.watcher import FolderWatcher
 # Data directory
 # ------------------------------------------------------------------
 
-def _resolve_data_dir() -> Path:
-    if len(sys.argv) > 1:
-        p = Path(sys.argv[1]).resolve()
+def _parse_args() -> tuple[Path, int]:
+    args = sys.argv[1:]
+    port = 8000
+    data_dir_str: str | None = None
+
+    i = 0
+    while i < len(args):
+        if args[i] == "--port" and i + 1 < len(args):
+            try:
+                port = int(args[i + 1])
+            except ValueError:
+                print(f"[KG] Error: invalid port '{args[i + 1]}'")
+                sys.exit(1)
+            i += 2
+        elif not args[i].startswith("--"):
+            data_dir_str = args[i]
+            i += 1
+        else:
+            print(f"[KG] Unknown argument: {args[i]}")
+            sys.exit(1)
+
+    if data_dir_str:
+        p = Path(data_dir_str).resolve()
         if not p.is_dir():
             print(f"[KG] Error: '{p}' is not a directory.")
             sys.exit(1)
-        return p
-    default = Path(__file__).parent / "sample_data"
-    default.mkdir(exist_ok=True)
-    return default.resolve()
+    else:
+        p = (Path(__file__).parent / "sample_data").resolve()
+        p.mkdir(exist_ok=True)
+
+    return p, port
 
 
-DATA_DIR = _resolve_data_dir()
+DATA_DIR, PORT = _parse_args()
 
 # ------------------------------------------------------------------
 # Core services
@@ -118,6 +140,6 @@ if __name__ == "__main__":
     import uvicorn
 
     print(f"[KG] Data directory : {DATA_DIR}")
-    print(f"[KG] Opening        : http://localhost:8000")
-    webbrowser.open("http://localhost:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="warning")
+    print(f"[KG] Opening        : http://localhost:{PORT}")
+    webbrowser.open(f"http://localhost:{PORT}")
+    uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="warning")

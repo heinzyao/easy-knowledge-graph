@@ -1,6 +1,6 @@
 """
-建立供應鏈分析範例 Excel 檔案。
-每個 .xlsx 代表一家企業，連結關係構成供應鏈知識圖譜。
+建立 Apple iPhone 供應鏈範例 Excel 檔案。
+每個 .xlsx 代表一家真實/代表性供應商，連結關係構成 iPhone 供應鏈知識圖譜。
 執行方式：uv run python create_sample.py
 """
 import openpyxl
@@ -30,206 +30,263 @@ def main():
     for old in folder.glob("*.xlsx"):
         old.unlink()
 
-    # ── 供應鏈結構 ──────────────────────────────────────────
+    # ── iPhone 供應鏈結構 ──────────────────────────────────────────
     #
-    #  稀土礦業  ──→  晶芯半導體  ──→┐
-    #                                ├──→  台灣精密電子  ──→  環球物流  ──→  全球零售商
-    #  鋼鐵原材料 ──→  宏利機殼廠  ──→┘         │
-    #                                          └──→  品質認證機構（隱式）
+    #  台積電（晶片代工）─────────────────────────────┐
+    #  三星（DRAM/NAND）──────────────────────────────┤
+    #  索尼（CMOS 感測器）──→ 富士康（組裝）          │
+    #  康寧（玻璃）          ↑                        │
+    #  村田製作所（被動元件）┘                        ↓
+    #                                           Apple（品牌端）──→ UPS/FedEx（物流）
+    #                                                             ↓（隱式）
+    #                                                        Best Buy（零售，無 Meta）
     #
-    # ── 1. 稀土礦業（Tier 3 原料供應商）─────────────────────
+    # ── 1. 台積電（Tier 1 晶片代工）─────────────────────────────
     wb = openpyxl.Workbook()
     meta_sheet(
         wb,
-        title="稀土礦業",
-        tags="原材料, 供應商, 採礦",
+        title="台積電",
+        tags="半導體, 晶片代工, Tier-1",
         links="",
-        description="稀土金屬開採與精煉商，供應鑭系元素原料給半導體與電池產業",
+        description="全球最大晶圓代工廠，為 Apple A 系列與 M 系列晶片提供 3nm / 5nm 製程代工",
     )
 
-    ws = wb.create_sheet("礦產儲量")
-    ws.append(["礦種", "已探明儲量 (噸)", "年產量 (噸)", "純度 (%)", "主要應用"])
-    ws.append(["鑭 (La)",  "120,000", "8,500",  "99.5", "光學玻璃、電池"])
-    ws.append(["鈰 (Ce)",  "280,000", "22,000", "99.0", "催化劑、拋光粉"])
-    ws.append(["釹 (Nd)",  "95,000",  "6,200",  "99.9", "永磁材料、晶片"])
-    ws.append(["鏑 (Dy)",  "18,000",  "1,100",  "99.9", "高溫永磁、感測器"])
-    ws.append(["鋱 (Tb)",  "8,500",   "420",    "99.9", "螢光材料、半導體"])
+    ws = wb.create_sheet("製程節點")
+    ws.append(["製程", "電晶體密度 (M/mm²)", "首批量產年", "主要客戶", "iPhone 用途"])
+    ws.append(["N3E (3nm)",  "171", "2023", "Apple",        "A17 Pro (iPhone 15 Pro)"])
+    ws.append(["N4P (4nm)",  "133", "2023", "Apple, Qualcomm", "A16 (iPhone 15)"])
+    ws.append(["N5  (5nm)",  "173", "2020", "Apple",        "A14 Bionic (iPhone 12)"])
+    ws.append(["N7  (7nm)",   "91", "2018", "Apple, AMD",   "A13 Bionic (iPhone 11)"])
 
-    ws2 = wb.create_sheet("出口數據")
-    ws2.append(["目的國", "2023 出口量 (噸)", "2024 出口量 (噸)", "年增率 (%)"])
-    ws2.append(["日本",   "12,400", "13,800", "11.3"])
-    ws2.append(["韓國",   "9,600",  "10,200", "6.3"])
-    ws2.append(["台灣",   "7,800",  "9,500",  "21.8"])
-    ws2.append(["美國",   "5,200",  "6,100",  "17.3"])
-    ws2.append(["德國",   "3,900",  "4,200",  "7.7"])
+    ws2 = wb.create_sheet("年度產能")
+    ws2.append(["年份", "12吋晶圓片/月 (K)", "Apple 佔比 (%)", "資本支出 (億 USD)"])
+    ws2.append(["2022", "250", "26", "363"])
+    ws2.append(["2023", "260", "25", "304"])
+    ws2.append(["2024", "280", "27", "300"])
+    ws2.append(["2025E","300", "28", "380"])
 
-    save(wb, folder, "稀土礦業")
+    save(wb, folder, "台積電")
 
-    # ── 2. 鋼鐵原材料（Tier 3 原料供應商）───────────────────
+    # ── 2. 三星（Tier 1 記憶體）──────────────────────────────────
     wb = openpyxl.Workbook()
     meta_sheet(
         wb,
-        title="鋼鐵原材料",
-        tags="原材料, 供應商, 鋼鐵",
+        title="三星電子",
+        tags="記憶體, DRAM, NAND, Tier-1",
         links="",
-        description="高強度鋼材與鋁合金板材供應商，主供精密製造業與電子機殼用料",
+        description="全球最大 DRAM 與 NAND Flash 製造商，供應 iPhone 的 LPDDR5 記憶體與 UFS 儲存晶片",
     )
 
-    ws = wb.create_sheet("材料規格")
-    ws.append(["材料", "型號", "厚度 (mm)", "降伏強度 (MPa)", "用途"])
-    ws.append(["冷軋鋼板",  "CR340",  "0.5", "340", "電子機殼"])
-    ws.append(["冷軋鋼板",  "CR590",  "0.8", "590", "結構件"])
-    ws.append(["鋁合金板",  "5052-H32","1.0","230", "輕量化機殼"])
-    ws.append(["鋁合金板",  "6061-T6", "1.5","276", "高強度結構"])
-    ws.append(["不鏽鋼板",  "SUS304",  "0.6","205", "耐腐蝕外殼"])
+    ws = wb.create_sheet("記憶體產品")
+    ws.append(["型號", "類型", "製程", "容量", "iPhone 機型", "單價 (USD)"])
+    ws.append(["LPDDR5X", "DRAM",      "12nm", "8GB",  "iPhone 15 Pro", "18.50"])
+    ws.append(["LPDDR5",  "DRAM",      "14nm", "6GB",  "iPhone 15",     "13.20"])
+    ws.append(["V-NAND",  "NAND Flash","6層",  "256GB","iPhone 15 Pro", "22.00"])
+    ws.append(["V-NAND",  "NAND Flash","6層",  "512GB","iPhone 15 Pro", "38.00"])
+    ws.append(["V-NAND",  "NAND Flash","6層",  "1TB",  "iPhone 15 Pro Max","68.00"])
 
-    ws2 = wb.create_sheet("報價單")
-    ws2.append(["材料", "規格", "數量 (噸)", "單價 (USD/噸)", "報價日期", "有效期"])
-    ws2.append(["冷軋鋼板 CR340",  "0.5mm × 1219mm", "200", "780",  "2025-01-10", "2025-03-10"])
-    ws2.append(["鋁合金板 5052",   "1.0mm × 1000mm", "150", "2,450","2025-01-10", "2025-03-10"])
-    ws2.append(["不鏽鋼板 SUS304", "0.6mm × 1219mm", "80",  "3,200","2025-01-10", "2025-03-10"])
+    ws2 = wb.create_sheet("出貨紀錄")
+    ws2.append(["季度", "DRAM 出貨 (億 GB)", "NAND 出貨 (EB)", "Apple 份額 (%)", "ASP 變化 (%)"])
+    ws2.append(["2024 Q1", "85",  "18.2", "14", "+3.2"])
+    ws2.append(["2024 Q2", "92",  "19.8", "15", "+1.8"])
+    ws2.append(["2024 Q3", "101", "22.1", "16", "+4.5"])
+    ws2.append(["2024 Q4", "112", "24.3", "18", "+5.1"])
 
-    save(wb, folder, "鋼鐵原材料")
+    save(wb, folder, "三星電子")
 
-    # ── 3. 晶芯半導體（Tier 2 零組件供應商）─────────────────
+    # ── 3. 索尼（Tier 1 相機感測器）──────────────────────────────
     wb = openpyxl.Workbook()
     meta_sheet(
         wb,
-        title="晶芯半導體",
-        tags="供應商, 半導體, 零組件",
-        links="稀土礦業",
-        description="專業晶片設計與代工廠，供應處理器、記憶體及感測器模組",
+        title="索尼半導體",
+        tags="感測器, CMOS, 相機, Tier-1",
+        links="",
+        description="全球市占率第一的 CMOS 影像感測器製造商，供應 iPhone 主相機與前鏡頭感測器",
     )
 
-    ws = wb.create_sheet("產品型號")
-    ws.append(["型號", "類型", "製程 (nm)", "時脈 (GHz)", "月供應量 (K pcs)", "單價 (USD)"])
-    ws.append(["CS-A15",  "應用處理器",  "5",  "3.2", "800",   "28.50"])
-    ws.append(["CS-M8G",  "記憶體 LPDDR5","12", "—",  "2,400", "6.80"])
-    ws.append(["CS-W6",   "Wi-Fi 6E 晶片","22", "—",  "1,200", "4.20"])
-    ws.append(["CS-P100", "電源管理 IC",  "40", "—",  "3,600", "1.95"])
-    ws.append(["CS-S32",  "指紋感測器",  "28", "—",  "600",   "8.40"])
+    ws = wb.create_sheet("感測器規格")
+    ws.append(["型號", "像素", "感光面積 (mm²)", "光圈", "iPhone 用途", "年供量 (M pcs)"])
+    ws.append(["IMX903", "48MP", "1/1.28", "f/1.78", "iPhone 15 Pro 主鏡",  "80"])
+    ws.append(["IMX772", "12MP", "1/2.55", "f/2.2",  "iPhone 15 前鏡頭",    "120"])
+    ws.append(["IMX858", "48MP", "1/2.0",  "f/2.2",  "iPhone 15 超廣角",    "80"])
+    ws.append(["IMX803", "12MP", "1/3.5",  "f/2.8",  "iPhone 15 Pro 望遠",  "60"])
+
+    ws2 = wb.create_sheet("技術藍圖")
+    ws2.append(["世代", "技術重點", "量產年", "應用機型"])
+    ws2.append(["Exmor RS 5G", "堆疊式 BSI + AI ISP",  "2023", "iPhone 15 系列"])
+    ws2.append(["Exmor RS 6G", "2層電晶體像素結構",     "2025", "iPhone 17 系列"])
+    ws2.append(["Exmor RS 7G", "有機光電轉換層",        "2027", "iPhone 19 系列（預計）"])
+
+    save(wb, folder, "索尼半導體")
+
+    # ── 4. 康寧（Tier 1 玻璃材料）────────────────────────────────
+    wb = openpyxl.Workbook()
+    meta_sheet(
+        wb,
+        title="康寧",
+        tags="玻璃, 材料, Tier-1",
+        links="",
+        description="Ceramic Shield 與 Gorilla Glass 製造商，供應 iPhone 螢幕保護玻璃與背板玻璃",
+    )
+
+    ws = wb.create_sheet("產品規格")
+    ws.append(["產品", "硬度 (莫氏)", "厚度 (mm)", "跌落強度提升", "iPhone 用途"])
+    ws.append(["Ceramic Shield Gen 2",  "7.5", "0.70", "4x vs 一般玻璃",  "iPhone 15 正面"])
+    ws.append(["Gorilla Glass Victus 2","7.0", "0.55", "2x vs 前代",      "iPhone 15 背板"])
+    ws.append(["Ceramic Shield Gen 1",  "7.5", "0.68", "4x vs 一般玻璃",  "iPhone 13/14 正面"])
 
     ws2 = wb.create_sheet("供貨合約")
-    ws2.append(["客戶", "合約編號", "品項", "月供量 (K)", "合約期限", "交期 (天)"])
-    ws2.append(["台灣精密電子", "SC-2025-001", "CS-A15",  "600", "2025-12-31", "45"])
-    ws2.append(["台灣精密電子", "SC-2025-002", "CS-M8G",  "1,800","2025-12-31","30"])
-    ws2.append(["台灣精密電子", "SC-2025-003", "CS-W6",   "900", "2025-12-31", "30"])
-    ws2.append(["日本電機株式會社","SC-2025-010","CS-A15","200","2025-06-30","60"])
+    ws2.append(["客戶", "合約年", "品項", "年供量 (M 片)", "金額 (億 USD)"])
+    ws2.append(["富士康", "2023–2025", "Ceramic Shield Gen 2",  "160", "4.8"])
+    ws2.append(["富士康", "2023–2025", "Gorilla Glass Victus 2","120", "2.4"])
 
-    save(wb, folder, "晶芯半導體")
+    save(wb, folder, "康寧")
 
-    # ── 4. 宏利機殼廠（Tier 2 零組件供應商）─────────────────
+    # ── 5. 村田製作所（Tier 1 被動元件）──────────────────────────
     wb = openpyxl.Workbook()
     meta_sheet(
         wb,
-        title="宏利機殼廠",
-        tags="供應商, 製造商, 機殼",
-        links="鋼鐵原材料",
-        description="精密金屬機殼與結構件製造商，支援 CNC 加工、衝壓、客製化開模",
+        title="村田製作所",
+        tags="被動元件, MLCC, 射頻, Tier-1",
+        links="",
+        description="全球最大 MLCC（積層陶瓷電容）與射頻模組製造商，每台 iPhone 使用逾 1,000 顆村田元件",
     )
 
-    ws = wb.create_sheet("月產能")
-    ws.append(["月份", "接單數量 (K pcs)", "出貨數量 (K pcs)", "產能使用率 (%)", "不良率 (%)"])
-    ws.append(["2025-01", "480", "465", "92", "0.8"])
-    ws.append(["2025-02", "420", "418", "84", "0.6"])
-    ws.append(["2025-03", "510", "498", "97", "1.1"])
-    ws.append(["2025-04", "530", "525", "98", "0.7"])
-    ws.append(["2025-05", "550", "540", "100","0.9"])
+    ws = wb.create_sheet("主要元件")
+    ws.append(["元件", "規格", "每台用量", "主要功能", "單價 (USD)"])
+    ws.append(["MLCC",           "0402 / 100nF", "850", "濾波、去耦合",   "0.002"])
+    ws.append(["Wi-Fi 射頻模組", "Wi-Fi 6E",     "1",   "無線通訊",       "3.20"])
+    ws.append(["Bluetooth 模組", "BT 5.3",       "1",   "短距通訊",       "1.80"])
+    ws.append(["壓電蜂鳴器",     "SMD 1206",     "2",   "觸覺回饋",       "0.45"])
+    ws.append(["SAW 濾波器",     "4G/5G Band",   "18",  "行動通訊濾波",   "0.15"])
 
-    ws2 = wb.create_sheet("客戶訂單")
-    ws2.append(["客戶", "料號", "材質", "月訂量 (K pcs)", "單價 (USD)", "備註"])
-    ws2.append(["台灣精密電子", "HM-A001", "鋁合金 5052", "300", "3.20", "主力機種"])
-    ws2.append(["台灣精密電子", "HM-A002", "冷軋鋼 CR340","180", "1.85", "入門機種"])
-    ws2.append(["韓國電子",     "HM-K010", "不鏽鋼 SUS304","50", "4.60", "高端系列"])
+    ws2 = wb.create_sheet("年度出貨")
+    ws2.append(["年份", "MLCC 出貨 (億顆)", "RF 模組 (M pcs)", "Apple 佔比 (%)", "營收 (億 USD)"])
+    ws2.append(["2022", "4200", "180", "28", "152"])
+    ws2.append(["2023", "4500", "195", "29", "148"])
+    ws2.append(["2024", "4800", "215", "30", "161"])
 
-    save(wb, folder, "宏利機殼廠")
+    save(wb, folder, "村田製作所")
 
-    # ── 5. 台灣精密電子（品牌 OEM 製造商）───────────────────
+    # ── 6. 富士康（Tier 0 代工組裝）──────────────────────────────
     wb = openpyxl.Workbook()
     meta_sheet(
         wb,
-        title="台灣精密電子",
-        tags="製造商, OEM, 品牌",
-        links="晶芯半導體, 宏利機殼廠, 環球物流",
-        description="消費性電子產品 OEM／ODM 製造商，年出貨量超過 500 萬台，銷往全球 40 國",
+        title="富士康",
+        tags="組裝, EMS, Tier-0",
+        links="台積電, 三星電子, 索尼半導體, 康寧, 村田製作所",
+        description="全球最大電子代工廠，負責 iPhone 約 70% 的最終組裝，鄭州廠高峰期日產逾 50 萬台",
     )
 
-    ws = wb.create_sheet("產品線")
-    ws.append(["產品", "型號", "售價區間 (USD)", "年出貨 (K)", "主要市場"])
-    ws.append(["智慧手機",  "PE-X10",  "280–420", "1,800", "亞洲、歐洲"])
-    ws.append(["平板電腦",  "PE-T8",   "350–550", "620",   "北美、歐洲"])
-    ws.append(["智慧手錶",  "PE-W3",   "120–220", "980",   "全球"])
-    ws.append(["無線耳機",  "PE-E5",   "60–120",  "1,500", "全球"])
-    ws.append(["智慧喇叭",  "PE-S2",   "80–160",  "400",   "北美、亞洲"])
+    ws = wb.create_sheet("組裝產線")
+    ws.append(["廠區", "國家", "月產能 (萬台)", "員工數 (萬人)", "主力機種"])
+    ws.append(["鄭州廠",   "中國", "1,500", "20", "iPhone 15 / Pro"])
+    ws.append(["成都廠",   "中國",   "400",  "6", "iPad / MacBook"])
+    ws.append(["清奈廠",   "印度",   "300",  "4", "iPhone 15"])
+    ws.append(["浦那廠",   "印度",   "200",  "3", "iPhone 14（轉產）"])
+    ws.append(["越南廠",   "越南",   "150",  "2", "AirPods / iPad"])
 
-    ws2 = wb.create_sheet("供應商清單")
-    ws2.append(["供應商", "供應品項", "年採購額 (億 USD)", "合作年限", "風險評級"])
-    ws2.append(["晶芯半導體", "處理器、記憶體、感測器", "2.8", "6", "低"])
-    ws2.append(["宏利機殼廠", "金屬機殼、結構件",       "1.2", "4", "低"])
-    ws2.append(["環球物流",   "國際運輸、倉儲",          "0.6", "3", "低"])
+    ws2 = wb.create_sheet("品質指標")
+    ws2.append(["指標", "目標值", "2024 Q3 實績", "備註"])
+    ws2.append(["良率 (%)",         "99.5", "99.6", "整機組裝良率"])
+    ws2.append(["DPPM",             "< 50", "38",   "百萬台中缺陷數"])
+    ws2.append(["OTD (%)",          "98.0", "98.4", "準時交貨率"])
+    ws2.append(["客訴回應 (hrs)",   "< 24", "18",   "Apple NPI 標準"])
 
-    save(wb, folder, "台灣精密電子")
+    save(wb, folder, "富士康")
 
-    # ── 6. 環球物流（第三方物流）────────────────────────────
+    # ── 7. Apple（品牌端）────────────────────────────────────────
     wb = openpyxl.Workbook()
     meta_sheet(
         wb,
-        title="環球物流",
-        tags="物流, 運輸, 倉儲",
-        links="台灣精密電子",
-        description="跨境供應鏈物流整合商，提供海運、空運、報關及倉儲一站式服務，覆蓋 35 國",
+        title="Apple",
+        tags="品牌, 設計, OEM客戶",
+        links="富士康, UPS物流",
+        description="iPhone 設計與品牌擁有者，主導晶片自研（A/M 系列）、供應鏈管理與全球銷售",
     )
 
-    ws = wb.create_sheet("運送路線")
-    ws.append(["起點", "目的地", "運輸方式", "標準天數", "月均量 (TEU/噸)", "成本指數"])
-    ws.append(["高雄港",   "洛杉磯港",   "海運",   "14", "320 TEU",  "100"])
-    ws.append(["高雄港",   "鹿特丹港",   "海運",   "25", "180 TEU",  "115"])
-    ws.append(["桃園機場", "法蘭克福機場","空運",  "2",  "85 噸",    "380"])
-    ws.append(["桃園機場", "羽田機場",   "空運",   "1",  "120 噸",   "200"])
-    ws.append(["高雄港",   "新加坡港",   "海運",   "4",  "210 TEU",  "85"])
+    ws = wb.create_sheet("iPhone 產品線")
+    ws.append(["機型", "發布年", "晶片", "起售價 (USD)", "全球銷量 (M)", "主要市場"])
+    ws.append(["iPhone 15 Pro Max", "2023", "A17 Pro",    "1,199", "42", "美國、中國"])
+    ws.append(["iPhone 15 Pro",     "2023", "A17 Pro",    "999",   "38", "美國、歐洲"])
+    ws.append(["iPhone 15 Plus",    "2023", "A16 Bionic", "899",   "18", "美國、亞洲"])
+    ws.append(["iPhone 15",         "2023", "A16 Bionic", "799",   "55", "全球"])
+    ws.append(["iPhone SE 3",       "2022", "A15 Bionic", "429",   "15", "新興市場"])
 
-    ws2 = wb.create_sheet("倉儲據點")
-    ws2.append(["地點", "類型", "面積 (m²)", "月吞吐量 (萬件)", "溫控", "保稅"])
-    ws2.append(["台灣 桃園",   "集貨中心", "8,500",  "180", "否", "是"])
-    ws2.append(["美國 加州",   "區域倉",   "12,000", "240", "否", "否"])
-    ws2.append(["荷蘭 鹿特丹", "歐洲樞紐", "9,800",  "160", "否", "是"])
-    ws2.append(["日本 大阪",   "區域倉",   "5,200",  "90",  "是", "否"])
-    ws2.append(["新加坡",      "東南亞樞紐","7,600", "130", "是", "是"])
+    ws2 = wb.create_sheet("供應商管理")
+    ws2.append(["供應商", "供應項目", "供應商評級", "年採購額 (億 USD)", "雙重來源"])
+    ws2.append(["台積電",   "A系列晶片代工",     "戰略級", "210", "否（獨家）"])
+    ws2.append(["三星電子", "DRAM / NAND",        "關鍵級", "78",  "是（SK海力士）"])
+    ws2.append(["索尼半導體","CMOS 感測器",       "關鍵級", "45",  "是（LG Innotek）"])
+    ws2.append(["康寧",     "Ceramic Shield",     "關鍵級", "24",  "否（獨家）"])
+    ws2.append(["村田製作所","MLCC / RF 模組",    "關鍵級", "38",  "是（TDK）"])
+    ws2.append(["富士康",   "iPhone 組裝（70%）", "戰略級", "580", "是（立訊精密）"])
 
-    save(wb, folder, "環球物流")
+    save(wb, folder, "Apple")
 
-    # ── 7. 全球零售商（無 Meta → 隱式連結）──────────────────
+    # ── 8. UPS物流（第三方物流）──────────────────────────────────
+    wb = openpyxl.Workbook()
+    meta_sheet(
+        wb,
+        title="UPS物流",
+        tags="物流, 航空快遞, 供應鏈",
+        links="Apple",
+        description="Apple 全球主要物流合作夥伴，負責 iPhone 新品發布期間從富士康到全球零售通路的空運配送",
+    )
+
+    ws = wb.create_sheet("航線資料")
+    ws.append(["起點", "目的地", "運輸方式", "標準天數", "月均量", "備註"])
+    ws.append(["上海浦東", "美國肯塔基（UPS Hub）", "包機空運", "1", "800 萬台/新品季", "iPhone 發布包機"])
+    ws.append(["清奈",     "美國肯塔基（UPS Hub）", "定期空運", "2", "120 萬台/月",     "印度產線"])
+    ws.append(["上海浦東", "法蘭克福",              "空運",     "1", "280 萬台/新品季", "歐洲市場"])
+    ws.append(["上海浦東", "東京成田",              "空運",     "1", "150 萬台/新品季", "日本市場"])
+
+    ws2 = wb.create_sheet("倉儲中心")
+    ws2.append(["地點", "類型", "面積 (m²)", "日吞吐量 (萬件)", "溫控", "保稅"])
+    ws2.append(["美國 路易維爾", "全球樞紐",   "250,000", "500", "否", "是"])
+    ws2.append(["德國 科隆",     "歐洲樞紐",   "120,000", "220", "否", "是"])
+    ws2.append(["香港",          "亞太集散",    "80,000", "180", "否", "是"])
+    ws2.append(["新加坡",        "東南亞集散",  "55,000", "100", "是", "是"])
+
+    save(wb, folder, "UPS物流")
+
+    # ── 9. Best Buy（無 Meta → 隱式連結）─────────────────────────
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "訂單記錄"
-    ws.append(["訂單號", "供應商", "品項", "數量 (K)", "金額 (萬 USD)", "交期", "狀態"])
-    ws.append(["PO-2025-001", "台灣精密電子", "PE-X10 智慧手機", "200", "560",  "2025-03-31", "交貨"])
-    ws.append(["PO-2025-002", "台灣精密電子", "PE-W3 智慧手錶",  "150", "225",  "2025-03-31", "交貨"])
-    ws.append(["PO-2025-003", "台灣精密電子", "PE-E5 無線耳機",  "300", "270",  "2025-04-15", "生產中"])
-    ws.append(["PO-2025-004", "台灣精密電子", "PE-T8 平板電腦",  "80",  "308",  "2025-05-01", "待確認"])
-    ws.append(["PO-2025-005", "環球物流",     "Q2 倉儲服務",     "—",   "42",   "2025-06-30", "進行中"])
+    ws.title = "銷售紀錄"
+    ws.append(["期間", "品牌", "機型", "銷售量 (萬台)", "營收 (億 USD)", "市占 (%)"])
+    ws.append(["2024 Q4", "Apple", "iPhone 15 Pro Max", "42", "50.4", "18"])
+    ws.append(["2024 Q4", "Apple", "iPhone 15 Pro",     "38", "38.0", "16"])
+    ws.append(["2024 Q4", "Apple", "iPhone 15",         "55", "43.9", "23"])
+    ws.append(["2024 Q4", "Apple", "iPhone SE 3",       "12",  "5.2",  "5"])
+    ws.append(["2024 Q4", "Apple", "iPhone 14",         "20", "14.0",  "8"])
 
-    ws2 = wb.create_sheet("市場分布")
-    ws2.append(["地區", "銷售佔比 (%)", "2024 年成長率 (%)", "主要品類"])
-    ws2.append(["北美", "38", "12.5", "平板電腦、智慧手機"])
-    ws2.append(["歐洲", "29", "8.3",  "智慧手機、智慧手錶"])
-    ws2.append(["亞太", "22", "18.7", "無線耳機、智慧喇叭"])
-    ws2.append(["其他", "11", "5.2",  "各類"])
+    ws2 = wb.create_sheet("庫存狀態")
+    ws2.append(["機型", "目前庫存 (台)", "在途庫存 (台)", "預估週轉天數", "補貨狀態"])
+    ws2.append(["iPhone 15 Pro Max 256G", "12,500", "8,000",  "18", "正常"])
+    ws2.append(["iPhone 15 Pro 128G",     "18,200", "10,000", "15", "正常"])
+    ws2.append(["iPhone 15 128G",         "35,600", "20,000", "20", "充足"])
+    ws2.append(["iPhone 15 Pro Max 1T",   "2,800",  "3,000",  "12", "偏緊"])
+
     # 隱式連結：儲存格直接包含其他節點名稱
-    ws3 = wb.create_sheet("合作夥伴")
-    ws3.append(["合作類型", "企業名稱", "合作起始年"])
-    ws3.append(["製造商", "台灣精密電子", "2020"])
-    ws3.append(["物流商", "環球物流",     "2022"])
+    ws3 = wb.create_sheet("供應商關係")
+    ws3.append(["關係類型", "公司名稱", "說明"])
+    ws3.append(["主要供貨商", "Apple",   "iPhone 獨家零售合作夥伴"])
+    ws3.append(["物流合作",  "UPS物流", "到店配送與退貨物流"])
 
-    save(wb, folder, "全球零售商")
+    save(wb, folder, "Best Buy")
 
-    print(f"\n完成！共建立 7 個範例 Excel 於 {folder}")
-    print("\n供應鏈層級：")
-    print("  [Tier 3] 稀土礦業、鋼鐵原材料")
-    print("  [Tier 2] 晶芯半導體（← 稀土礦業）、宏利機殼廠（← 鋼鐵原材料）")
-    print("  [OEM]    台灣精密電子（← 晶芯半導體、宏利機殼廠）")
-    print("  [物流]   環球物流（← 台灣精密電子）")
-    print("  [零售]   全球零售商（隱式連結 台灣精密電子、環球物流）")
+    print(f"\n完成！共建立 9 個範例 Excel 於 {folder}")
+    print("\nApple iPhone 供應鏈層級：")
+    print("  [Tier 1] 台積電（晶片代工）")
+    print("  [Tier 1] 三星電子（DRAM/NAND）")
+    print("  [Tier 1] 索尼半導體（CMOS 感測器）")
+    print("  [Tier 1] 康寧（Ceramic Shield 玻璃）")
+    print("  [Tier 1] 村田製作所（MLCC/RF 元件）")
+    print("  [Tier 0] 富士康（最終組裝，← 以上所有 Tier-1）")
+    print("  [品牌]   Apple（← 富士康、UPS物流）")
+    print("  [物流]   UPS物流（← Apple）")
+    print("  [零售]   Best Buy（隱式連結 Apple、UPS物流）")
     print("\n執行：uv run python main.py  即可啟動")
 
 
