@@ -141,9 +141,9 @@ html, body {
     transition: stroke var(--transition);
 }
 .link.implicit {
-    stroke: #3a3a3a;
+    stroke: #5a7090;
     stroke-dasharray: 5 4;
-    stroke-width: 0.8;
+    stroke-width: 1.0;
 }
 .link.highlighted { stroke: var(--accent); stroke-opacity: 0.8; }
 .link.dimmed { stroke-opacity: 0.1; }

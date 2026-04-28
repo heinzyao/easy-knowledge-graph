@@ -52,6 +52,7 @@ class GraphBuilder:
         # Implicit edges (files without Meta sheet only)
         if include_implicit:
             known_names = set(name_to_id.keys())
+            implicit_count = 0
             for node in nodes:
                 if not node["has_meta"]:
                     file_path = self.base_dir / node["id"]
@@ -65,6 +66,8 @@ class GraphBuilder:
                                     relation_type="implicit",
                                     weight=0.3,
                                 )
+                                implicit_count += 1
+            print(f"[KG] Implicit edges detected: {implicit_count}")
 
     # ------------------------------------------------------------------
     # Incremental updates
