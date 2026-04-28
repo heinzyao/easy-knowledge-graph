@@ -96,15 +96,34 @@ class GraphBuilder:
             if target_id and target_id != node_id:
                 self._graph.add_edge(node_id, target_id, relation_type="explicit", weight=1.0)
 
-        # Re-add edges from other nodes that point to this node
+        # Re-add implicit edges for this node (only if no Meta sheet)
+        known_names = set(name_to_id.keys())
+        if not node["has_meta"]:
+            refs = scan_implicit_links(file_path, self.base_dir, known_names)
+            for ref in refs:
+                target_id = name_to_id.get(ref)
+                if target_id and target_id != node_id:
+                    if not self._graph.has_edge(node_id, target_id):
+                        self._graph.add_edge(node_id, target_id, relation_type="implicit", weight=0.3)
+
+        # Re-add edges from other nodes that point to this node (explicit + implicit)
         new_title = node["title"]
         new_stem = Path(node_id).stem
         for other_id, other_data in self._graph.nodes(data=True):
             if other_id == node_id:
                 continue
+            # Explicit links from other nodes
             for ref in other_data.get("links", []):
                 if ref in (new_title, new_stem):
                     self._graph.add_edge(other_id, node_id, relation_type="explicit", weight=1.0)
+            # Implicit links from other nodes (only nodes without Meta)
+            if not other_data.get("has_meta"):
+                other_path = self.base_dir / other_id
+                if other_path.exists():
+                    refs = scan_implicit_links(other_path, self.base_dir, {new_title, new_stem})
+                    if new_title in refs or new_stem in refs:
+                        if not self._graph.has_edge(other_id, node_id):
+                            self._graph.add_edge(other_id, node_id, relation_type="implicit", weight=0.3)
 
     def remove_node(self, node_id: str) -> None:
         """Remove a node and all its edges."""
